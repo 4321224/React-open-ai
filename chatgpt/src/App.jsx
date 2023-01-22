@@ -1,32 +1,33 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
+import {Configuration, OpenAIApi} from 'openai'
+import OptionSelection from './components/OptionSelection'
+import Translation from './components/Translation'
+import { arrayItems } from './AiOption'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
-
+ const configuration = new Configuration({
+  apikey: import.meta.env.Open_AI_Key
+ })
+const openai = new OpenAIApi(configuration)
+const [option, setOption] = useState({})
+const [result, setResult] = useState("")
+const [input, setInput] = useState("")
+const selectOption = (option) => {
+  setOption(option)
+}
+const stuff = async () => {
+  let object = {...option, prompt: input}
+  const response = await openai.createCompletion(object)
+  setResult(response.data.choices[0].text)
+}
   return (
     <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      {Object.values(option).length === 0 ? (
+      <OptionSelection arrayItems={arrayItems} selectOption={selectOption}/>
+      ) : (
+      <Translation stuff={stuff} setInput={setInput} result={result}/>
+      )}
     </div>
   )
 }
